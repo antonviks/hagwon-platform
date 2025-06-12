@@ -1,5 +1,3 @@
-// src/components/auth/AuthForm.tsx
-
 'use client'
 
 import { useState } from 'react'
@@ -29,7 +27,7 @@ export function AuthForm({ mode, userType = 'teacher', onSuccess }: AuthFormProp
 
     try {
       if (mode === 'signup') {
-        const { data, error } = await supabase.auth.signUp({
+        const signUpResult = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -40,27 +38,27 @@ export function AuthForm({ mode, userType = 'teacher', onSuccess }: AuthFormProp
           }
         })
 
-        if (error) throw error
+        if (signUpResult.error) throw signUpResult.error
 
-        if (data.user && !data.user.email_confirmed_at) {
+        if (signUpResult.data.user && !signUpResult.data.user.email_confirmed_at) {
           setMessage('Check your email for the confirmation link!')
         } else {
           setMessage('Account created successfully!')
           onSuccess?.()
         }
       } else {
-        const { data, error } = await supabase.auth.signInWithPassword({
+        const signInResult = await supabase.auth.signInWithPassword({
           email,
           password
         })
 
-        if (error) throw error
+        if (signInResult.error) throw signInResult.error
 
         setMessage('Logged in successfully!')
         onSuccess?.()
       }
-    } catch (error: any) {
-      setError(error.message)
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'An error occurred')
     } finally {
       setLoading(false)
     }
